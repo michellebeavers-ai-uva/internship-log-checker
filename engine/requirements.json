@@ -1,0 +1,175 @@
+{
+  "_about": "Program requirements. Edit this file (not the code) when the program changes.",
+  "program": {
+    "total_hours": 320,
+    "course_target": 32,
+    "choice_max_per_activity": 3,
+    "own_building_label": "Main Site",
+    "external_total_min": 50,
+    "external_min_per_type": 12.5,
+    "external_types": [
+      "Elementary",
+      "Middle",
+      "High",
+      "Central Office",
+      "Agency"
+    ],
+    "external_types_needed": 5,
+    "competency_leeway_hours": 2
+  },
+  "competencies": {
+    "1": {
+      "name": "Instructional Leadership",
+      "choice_min": 3
+    },
+    "2": {
+      "name": "Organizational Management",
+      "choice_min": 0
+    },
+    "3": {
+      "name": "Operational Management",
+      "choice_min": 23
+    },
+    "4": {
+      "name": "Systemic Equity & Community Engagement",
+      "choice_min": 4
+    },
+    "5": {
+      "name": "Professionalism",
+      "choice_min": 23
+    },
+    "6": {
+      "name": "Advocacy",
+      "choice_min": 17
+    }
+  },
+  "courses": {
+    "7806": {
+      "name": "School & Community Relations"
+    },
+    "7812": {
+      "name": "Leading Continuous Improvement"
+    },
+    "7811": {
+      "name": "Teaching & Learning"
+    },
+    "7807": {
+      "name": "Leadership I"
+    },
+    "7810": {
+      "name": "School Law & Policy"
+    },
+    "7140": {
+      "name": "Leadership II (LEAD II)"
+    },
+    "7808": {
+      "name": "School Finance"
+    },
+    "7805": {
+      "name": "Cultivating Professional Capacity"
+    },
+    "7813": {
+      "name": "Educational Technology"
+    },
+    "7815": {
+      "name": "Leadership for Diverse Learners"
+    }
+  },
+  "valid_roles": [
+    "Observer",
+    "Participant",
+    "Leader"
+  ],
+  "valid_locations": [
+    "Main Site",
+    "Elementary",
+    "Middle",
+    "High",
+    "Central Office",
+    "Agency",
+    "Other"
+  ],
+  "terms": {
+    "Summer": {
+      "start": "05-02",
+      "end": "08-01"
+    },
+    "Fall": {
+      "start": "08-02",
+      "end": "12-01"
+    },
+    "Spring": {
+      "start": "12-02",
+      "end": "05-01"
+    }
+  },
+  "text": {
+    "min_words": 12,
+    "duplicate_similarity": 0.9,
+    "library_similarity": 0.85,
+    "exact_similarity": 0.98,
+    "count_library_copies": true,
+    "_about": "duplicate_similarity: a later CHOICE entry this similar to an earlier one does not count. library_similarity / exact_similarity: how close to a Choice Library sample is 'very close' / 'copied'. count_library_copies: false = entries copied word-for-word from a sample also do not count."
+  },
+  "second_med_reminder": "As a 2nd-MEd student you do not take {courses}, but you still complete their internship experiences so that you finish with the full {total} hours in four semesters. They are on the '2nd Int Addl Reqs' tab of your log and count toward the same hour, competency, and location requirements.",
+  "pathways": {
+    "_about": "Course sequence by program. 'experience_only' courses are not taken, but their internship experiences are still completed. In the 2nd-MEd log they live on the '2nd Int Addl Reqs' tab; the student chooses the semester.",
+    "standard": {
+      "label": "Standard (5 semesters)",
+      "semesters": {
+        "1": [
+          "7806",
+          "7812"
+        ],
+        "2": [
+          "7807",
+          "7811"
+        ],
+        "3": [
+          "7140",
+          "7810"
+        ],
+        "4": [
+          "7808",
+          "7805"
+        ],
+        "5": [
+          "7813",
+          "7815"
+        ]
+      },
+      "experience_only": []
+    },
+    "second_med": {
+      "label": "2nd MEd (4 semesters)",
+      "semesters": {
+        "1": [
+          "7806",
+          "7812"
+        ],
+        "2": [
+          "7807",
+          "7811"
+        ],
+        "3": [
+          "7805",
+          "7810"
+        ],
+        "4": [
+          "7808",
+          "7815"
+        ]
+      },
+      "experience_only": [
+        "7140",
+        "7813"
+      ]
+    }
+  },
+  "branding": {
+    "_about": "Text shown in the header of every report.",
+    "line1": "UVA School of Education",
+    "line2": "Administration & Supervision",
+    "line3": "Internship Program"
+  }
+}

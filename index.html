@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check your internship planning log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&family=Libre+Franklin:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111111;--muted:#666666;--line:#DADADA;--wash:#F1F1EF;--teal:#232D4B;--teal-d:#141E3C;--orange:#E57200;--red:#8C1D18;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Franklin Gothic Book","Libre Franklin","Franklin Gothic Medium",Arial,Helvetica,sans-serif;color:var(--ink);background:#fff;line-height:1.55}
+.band{background:var(--teal);color:#fff;padding:1.1rem 1.25rem .95rem;border-bottom:6px solid var(--orange)}
+.band div{max-width:880px;margin:0 auto}
+.band .l1{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92}
+.band .l2{font-family:"Adobe Caslon Pro","Libre Caslon Text",Georgia,serif;font-size:1.6rem;line-height:1.2;margin:.1rem auto}
+.band .l3{font-size:.85rem;color:#C8CBD2}
+main{max-width:880px;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+h1,h2{font-family:"Adobe Caslon Pro","Libre Caslon Text",Georgia,"Times New Roman",serif;color:var(--teal)}
+h1{font-size:2rem;line-height:1.15;margin:0 0 .5rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem}
+.lede{font-size:1.1rem;color:var(--muted);max-width:60ch;margin:0 0 1.5rem}
+.privacy{border-left:6px solid var(--orange);background:var(--wash);padding:.7rem 1rem;max-width:62ch;margin:0 0 1.8rem}
+.drop{display:block;border:2px dashed var(--teal);border-radius:6px;padding:1.6rem 1.2rem;cursor:pointer;background:#fff}
+.drop:hover,.drop:focus-within{background:var(--wash)}
+.drop b{display:block;font-size:1.1rem}.drop span{color:var(--muted)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop:focus-within{outline:3px solid var(--orange);outline-offset:2px}
+label{font-weight:700;display:block;margin:.8rem 0 .2rem}
+select,input[type=text],input[type=number]{font:inherit;padding:.4rem .5rem;border:1px solid #8a95a3;border-radius:4px;background:#fff;color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:1rem 1.5rem}
+table{border-collapse:collapse;width:100%;margin:.5rem 0 1rem;font-size:.95rem}
+th,td{text-align:left;padding:.4rem .5rem;border-bottom:1px solid var(--line)}th{background:var(--wash)}
+td.n{text-align:right}
+button{font:inherit;cursor:pointer;border-radius:4px}
+.primary{background:var(--teal);color:#fff;border:0;padding:.65rem 1.2rem;font-weight:700}
+.primary:hover{background:var(--teal-d)}.primary:disabled{background:#8a95a3;cursor:wait}
+.ghost{background:#fff;color:var(--teal);border:1px solid var(--teal);padding:.5rem .9rem;font-weight:700}
+.ghost:hover{background:var(--wash)}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.tabs{display:flex;gap:.25rem;border-bottom:4px solid var(--orange);margin-top:1rem;flex-wrap:wrap}
+.tab{background:#fff;border:1px solid var(--line);border-bottom:0;padding:.55rem 1rem;font-weight:700;color:var(--muted);border-radius:4px 4px 0 0}
+.tab[aria-selected=true]{background:var(--teal);color:#fff;border-color:var(--teal)}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin:.8rem 0}
+iframe{width:100%;height:70vh;min-height:480px;border:1px solid var(--line);border-radius:4px;background:#fff}
+.status{min-height:1.5em;color:var(--muted)}.error{color:var(--red);font-weight:700}
+.counts{display:flex;gap:1.5rem;flex-wrap:wrap;margin:.8rem 0}.counts div{min-width:7rem}
+.counts b{font-size:1.9rem;display:block;line-height:1.1;font-family:"Adobe Caslon Pro","Libre Caslon Text",Georgia,serif;color:var(--teal)}
+fieldset{border:1px solid var(--line);border-radius:6px;margin:1rem 0;padding:.6rem 1rem 1rem}
+legend{font-weight:700;padding:0 .4rem}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:.35rem 1rem}
+.chk{display:flex;gap:.5rem;align-items:flex-start;font-weight:400;margin:.15rem 0}
+.chk input{margin-top:.3rem;width:1.05rem;height:1.05rem}.chk.off{color:#8a95a3}
+details.dd{border:1px solid #8a95a3;border-radius:4px;padding:.45rem .7rem;background:#fff}
+details.dd summary{cursor:pointer;font-weight:700}details.dd[open] summary{margin-bottom:.6rem}
+.hint{color:var(--muted);font-size:.9rem;margin-top:.2rem;max-width:34ch}
+.note{background:var(--wash);padding:.5rem .8rem;border-radius:4px}
+[hidden]{display:none!important}
+footer{margin-top:3rem;color:var(--muted);font-size:.9rem;border-top:3px solid var(--teal);padding-top:1rem}
+@media (prefers-reduced-motion:no-preference){.drop{transition:background .15s}}
+</style>
+</head>
+<body>
+<header class="band"><div class="l1">UVA School of Education</div><div class="l2">Administration &amp; Supervision</div><div class="l3">Internship Program</div></header>
+<main>
+  <h1>Check your internship planning log</h1>
+  <p class="lede">Choose your A&amp;S Planning Log and get feedback on hours, competencies, locations, and how your experiences are described, plus start-of-semester and end-of-semester reports.</p>
+  <p class="privacy"><b>Your file stays on your computer.</b> It is read inside this web page and is never uploaded. The checks are fixed rules, not AI, so you don’t need a Claude account.</p>
+
+  <p id="embedNote" class="note" hidden>Printing or downloading blocked inside Canvas? <a id="embedLink" target="_blank" rel="noopener">Open this page in its own tab</a>.</p>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">1. Choose your planning log</h2>
+    <label class="drop"><b>Choose your .xlsx planning log</b><span>The workbook you fill in each semester, with one tab per course.</span>
+      <input id="file" type="file" accept=".xlsx"></label>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="step2" hidden aria-labelledby="s2">
+    <h2 id="s2">2. Tell us about your semester</h2>
+    <div class="row">
+      <div><label for="sid">Student ID</label>
+        <input id="sid" type="text" maxlength="40" autocomplete="off" aria-describedby="sidhelp" style="width:12rem">
+        <div id="sidhelp" class="hint">Printed on your reports instead of your name. Please don’t type your name.</div></div>
+      <div><label for="term">Semester</label>
+        <select id="term"><option>Summer</option><option>Fall</option><option>Spring</option></select></div>
+      <div><label for="year">Year the semester ends</label><input id="year" type="number" min="2024" max="2040" style="width:6rem"></div>
+      <div><label for="pathway">Program</label>
+        <select id="pathway"><option value="standard">Standard (5 semesters)</option><option value="second_med">2nd MEd (4 semesters)</option></select></div>
+    </div>
+    <p id="window" class="status"></p>
+    <p id="pathwayNote" class="note" hidden></p>
+    <fieldset><legend id="legendCur">Which courses are you currently enrolled in?</legend><div id="currentBox" class="checks"></div></fieldset>
+    <fieldset><legend>Which courses have you already completed?</legend>
+      <details class="dd"><summary id="doneSummary">None selected</summary><div id="doneBox" class="checks"></div></details></fieldset>
+    <p id="colNote" class="note" hidden></p>
+    <p id="formError" class="error" role="alert"></p>
+    <button id="run" class="primary">Check my log</button>
+  </section>
+
+  <section id="step3" hidden aria-labelledby="s3">
+    <h2 id="s3">3. Your results</h2>
+    <div class="counts" id="counts"></div>
+    <div class="tabs" role="tablist" aria-label="Reports">
+      <button class="tab" role="tab" id="t-feedback" aria-selected="true" data-k="feedback">Feedback</button>
+      <button class="tab" role="tab" id="t-start" aria-selected="false" data-k="start">Start of semester</button>
+      <button class="tab" role="tab" id="t-end" aria-selected="false" data-k="end">End of semester</button>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="print">Print or save as PDF</button>
+      <button class="ghost" id="download">Download this report</button>
+      <button class="ghost" id="again">Start over with another file</button>
+    </div>
+    <iframe id="view" title="Report preview" sandbox="allow-same-origin"></iframe>
+  </section>
+
+  <footer>Checks are based on the A&amp;S Planning Log. The log is your plan; the Canvas tracking form is the official record. Questions about a result? Contact your internship supervisor.</footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+const ENGINE_FILES = ["__init__.py","config.py","parse.py","textcheck.py","rules.py","reports.py","api.py","requirements.json"];
+// The spreadsheet reader (openpyxl) is not in Pyodide's own package list, so its two small pure-Python files ship with this site.
+const WHEELS = ["et_xmlfile-2.0.0-py3-none-any.whl","openpyxl-3.1.5-py2.py3-none-any.whl"];
+const $ = id => document.getElementById(id);
+let py = null, fileBuf = null, reports = null, currentKey = "feedback";
+if (window.self !== window.top){ $("embedNote").hidden = false; $("embedLink").href = location.href; }
+
+function say(msg, isError){ const s=$("status"); s.textContent=msg; s.className="status"+(isError?" error":""); }
+
+// The engine is marked ready ONLY after every step succeeds. If any step fails, the next try starts fresh
+// (an earlier version marked it ready too soon, which hid the real error behind "py.globals.get is not a function").
+let bootPromise = null;
+function boot(){
+  if (bootPromise) return bootPromise;
+  bootPromise = (async () => {
+    if (location.protocol === "file:")
+      throw new Error("This page was opened as a file on your computer. Open it from its web address instead: http://localhost:8000 (while the terminal command is running) or your GitHub link.");
+    if (typeof loadPyodide !== "function")
+      throw new Error("The Python engine could not be downloaded. Check your internet connection (this network may be blocking cdn.jsdelivr.net) and reload the page.");
+    say("Loading the checker for the first time. This can take 10–20 seconds…");
+    const p = await loadPyodide();
+    for (const w of WHEELS){
+      let r;
+      try { r = await fetch("wheels/"+w, {cache:"no-store"}); }
+      catch (e) { throw new Error("Could not load wheels/"+w+" ("+e.message+"). If you are testing on your own computer, make sure the terminal command is still running."); }
+      if (!r.ok) throw new Error("Could not find wheels/"+w+" (error "+r.status+"). On your own computer, start the web server from INSIDE the intern-checker folder. On GitHub, check that the wheels folder was uploaded.");
+      await p.unpackArchive(await r.arrayBuffer(), "wheel");
+    }
+    p.FS.mkdirTree("/home/pyodide/engine");
+    for (const f of ENGINE_FILES){
+      let r;
+      try { r = await fetch("engine/"+f, {cache:"no-store"}); }
+      catch (e) { throw new Error("Could not load engine/"+f+" ("+e.message+"). If you are testing on your own computer, make sure the terminal command is still running."); }
+      if (!r.ok) throw new Error("Could not find engine/"+f+" (error "+r.status+"). On your own computer, start the web server from INSIDE the intern-checker folder. On GitHub, check that the engine folder was uploaded.");
+      p.FS.writeFile("/home/pyodide/engine/"+f, await r.text());
+    }
+    p.runPython("import sys; sys.path.insert(0,'/home/pyodide')\nfrom engine.api import inspect_json, run_json");
+    for (const n of ["inspect_json","run_json"])
+      if (typeof p.globals.get(n) !== "function") throw new Error("The engine loaded but "+n+" was not found. Reload the page.");
+    py = p;
+    return p;
+  })().catch(e => { bootPromise = null; throw e; });
+  return bootPromise;
+}
+
+async function inspect(term, year){
+  py.FS.writeFile("/tmp/log.xlsx", new Uint8Array(fileBuf));
+  return JSON.parse(py.globals.get("inspect_json")("/tmp/log.xlsx", term||"", year? String(year):"", ""));
+}
+
+const esc = t => t.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const picked = name => new Set([...document.querySelectorAll(`input[name=${name}]:checked`)].map(i=>i.value));
+
+function updateDone(){
+  const cur = picked("cur");
+  document.querySelectorAll("input[name=done]").forEach(i=>{
+    const blocked = cur.has(i.value);
+    if (blocked) i.checked = false;
+    i.disabled = blocked; i.parentElement.classList.toggle("off", blocked);
+  });
+  const n = picked("done").size;
+  $("doneSummary").textContent = n ? `${n} course${n>1?"s":""} selected` : "None selected";
+}
+
+let lastInfo = null, pathwayTouched = false;
+
+function renderLists(){
+  const info = lastInfo, path = $("pathway").value;
+  const eo = new Set((info.pathways[path] || {experience_only:[]}).experience_only);
+  const keepCur = picked("cur"), keepDone = picked("done");
+  const mk = (name, keep) => info.courses.map(c =>
+    `<label class="chk"><input type="checkbox" name="${name}" value="${c.code}"${keep.has(c.code)?" checked":""}> ${c.code} – ${esc(c.name)}${eo.has(c.code)?" (experiences only)":""}</label>`).join("");
+  $("currentBox").innerHTML = mk("cur", keepCur);
+  $("doneBox").innerHTML = mk("done", keepDone);
+  $("legendCur").textContent = eo.size ? "Which courses or experience-only blocks are you working on this semester?"
+                                       : "Which courses are you currently enrolled in?";
+  const names = [...eo].map(c => `${c} – ${info.course_names[c]}`).join(" and ");
+  $("pathwayNote").hidden = !eo.size;
+  $("pathwayNote").textContent = eo.size ? `2nd MEd: you do not take ${names}, but you still complete their experiences. Select them when you are completing those experiences this semester.` : "";
+  document.querySelectorAll("input[name=cur],input[name=done]").forEach(i=>i.addEventListener("change", updateDone));
+  updateDone();
+}
+
+function fillCourses(info){
+  lastInfo = info;
+  $("term").value = info.term; $("year").value = info.year;
+  if (!pathwayTouched) $("pathway").value = info.detected_pathway;
+  const fmt = iso => { const [y,m,d]=iso.split("-"); return `${+m}/${+d}/${y}`; };
+  $("window").textContent = `${info.term} ${info.year}: ${fmt(info.start)} – ${fmt(info.end)}`;
+  renderLists();
+  const note = $("colNote");
+  note.hidden = info.has_completed_column;
+  note.textContent = info.has_completed_column ? "" :
+    "Your log has no Completed column, so on your end-of-semester report an activity counts as completed when its date is on or before today.";
+  if (info.missing_tabs.length) say("These tabs were not found: "+info.missing_tabs.join(", ")+". Check that this is the A&S Planning Log.", true);
+}
+$("pathway").addEventListener("change", ()=>{ pathwayTouched = true; renderLists(); });
+
+$("file").addEventListener("change", async e=>{
+  const f = e.target.files[0]; if(!f) return;
+  $("step2").hidden = $("step3").hidden = true; pathwayTouched = false;
+  try{
+    fileBuf = await f.arrayBuffer();
+    await boot();
+    say("Reading your log…");
+    const info = await inspect();
+    if (info.error){ say(info.error, true); return; }
+    say("Loaded. Confirm the details below.");
+    fillCourses(info); $("step2").hidden = false;
+    $("step2").scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(err){
+    say("Could not start the checker: "+err.message, true);
+    $("file").value = "";            // lets the same file be chosen again after you fix the problem
+  }
+});
+
+async function reinspect(){
+  const info = await inspect($("term").value, $("year").value);
+  if (info.error){ say(info.error, true); return; }
+  fillCourses(info);
+}
+$("term").addEventListener("change", reinspect);
+$("year").addEventListener("change", reinspect);
+
+$("run").addEventListener("click", async ()=>{
+  if (!py){ say("Please choose your planning log first.", true); return; }
+  const sid = $("sid").value.trim(), cur = picked("cur"), done = picked("done");
+  const err = !sid ? "Enter your student ID." : !cur.size ? "Select at least one course you are currently enrolled in." : "";
+  $("formError").textContent = err;
+  if (err){ (!sid ? $("sid") : document.querySelector("input[name=cur]")).focus(); return; }
+  const btn = $("run"); btn.disabled = true; say("Checking…");
+  try{
+    const statuses = {};
+    document.querySelectorAll("input[name=cur]").forEach(i=>{
+      statuses[i.value] = cur.has(i.value) ? "current" : done.has(i.value) ? "completed" : "future"; });
+    py.FS.writeFile("/tmp/log.xlsx", new Uint8Array(fileBuf));
+    const opts = {term:$("term").value, year:$("year").value, statuses, pathway:$("pathway").value, student_id:sid};
+    const out = JSON.parse(py.globals.get("run_json")("/tmp/log.xlsx", JSON.stringify(opts)));
+    if (out.error){ say(out.error, true); return; }
+    reports = out.reports;
+    const c = out.counts;
+    $("counts").innerHTML = `<div><b>${c.action}</b>to fix now</div><div><b>${c.check}</b>to check</div><div><b>${c.tip}</b>tips</div><div><b>${c.ok}</b>already met</div>`;
+    $("step3").hidden = false; show("feedback");
+    say("");
+    $("step3").scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(err){ say("Something went wrong: "+err.message, true); }
+  finally{ btn.disabled = false; }
+});
+
+function show(k){
+  currentKey = k;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", t.dataset.k===k));
+  $("view").srcdoc = reports[k];
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.k)));
+$("print").addEventListener("click",()=>{ const w=$("view").contentWindow; w.focus(); w.print(); });
+$("download").addEventListener("click",()=>{
+  const blob = new Blob([reports[currentKey]], {type:"text/html"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentKey}-${$("term").value.toLowerCase()}-${$("year").value}.html`;
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+});
+$("again").addEventListener("click",()=>{
+  fileBuf = reports = null; $("file").value = "";
+  $("step2").hidden = $("step3").hidden = true; say("");
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+</script>
+</body>
+</html>
