@@ -24,7 +24,7 @@ table{border-collapse:collapse;width:100%;margin:.5rem 0 1rem;font-size:.9rem}
 th,td{text-align:left;padding:.42rem .55rem;border-bottom:1px solid var(--gray2);vertical-align:top}
 th{background:var(--blue);color:#fff;font-weight:700;border-bottom:0}
 tbody tr:nth-child(even) td{background:var(--gray)}
-td.n,th.n{text-align:right;white-space:nowrap}
+td.n,th.n{text-align:right;white-space:nowrap}th.n{white-space:normal}
 .chip{display:inline-block;padding:.05rem .5rem;border-radius:3px;font-size:.8rem;font-weight:700;white-space:nowrap;color:var(--ink)}
 .chip.long{white-space:normal;max-width:12rem;margin-top:.15rem}td.w,th.w{width:42%}
 table.compact{table-layout:fixed;font-size:.76rem;line-height:1.28}table.compact th,table.compact td{padding:.26rem .38rem;word-wrap:break-word;overflow-wrap:break-word}
@@ -40,7 +40,7 @@ table.compact .chip{font-size:.7rem;white-space:normal;max-width:none}
 .box{background:var(--gray);padding:.75rem 1rem;border-left:6px solid var(--orange);margin:.9rem 0}
 .tiles{margin:.9rem 0 .4rem;font-size:0}
 .tile{display:inline-block;vertical-align:top;width:32%;margin:0 1.3% .5rem 0;background:var(--gray);border-top:5px solid var(--orange);padding:.6rem .9rem}
-.tile:last-child{margin-right:0}.tile{min-height:5.4rem}
+.tile:last-child{margin-right:0}.tile{min-height:5.6rem}
 .tile b{display:block;font-family:"Adobe Caslon Pro","Libre Caslon Text",Georgia,serif;font-size:2rem;line-height:1.1;color:var(--blue)}
 .tile span{display:block;font-size:.85rem;color:var(--ink);font-weight:700;margin-top:.1rem}
 .bar{background:var(--gray2);height:16px;margin:.3rem 0 .15rem}.bar i{display:block;background:var(--orange);height:16px}
@@ -50,7 +50,10 @@ table.compact .chip{font-size:.7rem;white-space:normal;max-width:none}
 .run{font-size:.82rem;margin:.4rem 0 0}.run td{padding:.25rem .55rem}.run td:first-child{width:30%;font-weight:700;color:var(--blue)}
 .runnote{font-size:.85rem;color:var(--muted);margin:.2rem 0}
 @page{margin:.5in}
-@media print{.band{padding:.9rem 1.2rem .8rem}main{padding:1rem 1.2rem}h2{break-after:avoid}table,.finding,.tile{break-inside:avoid}}
+@media print{.band{padding:.9rem 1.2rem .8rem}main{padding:1rem 1.2rem}
+h2,h3{break-after:avoid;page-break-after:avoid}
+.finding,.tile,tr{break-inside:avoid;page-break-inside:avoid}
+table{break-inside:auto;page-break-inside:auto}thead{display:table-header-group}}
 """
 
 SEV_LABEL = {"action": ("Fix now", "need"), "check": ("Check", "check"), "tip": ("Tip", "tip"),
@@ -294,7 +297,7 @@ def _activity_table(result, code, with_status):
             row.append(flag or "—")
         rows.append(row)
     heads = ["Type", "Date", "Location", "Role", "Hrs", "Description", "Status" if with_status else "Flag"]
-    return _table(heads, rows, num_cols=(4,), widths=[10, 10, 12, 12, 5, 35, 16])
+    return _table(heads, rows, num_cols=(4,), widths=[11, 13, 13, 13, 5, 30, 15])
 
 
 def feedback_html(result, student_id=""):
@@ -486,8 +489,8 @@ def mentor_html(result, student_id=""):
     choice_hours = sum(a.hours for a in choice)
 
     body = _head(result, "Mentor summary", student_id)
-    body += _tiles([(_h(d["current"]), "hours completed this semester"), (_h(d["previous"]), "hours completed in earlier semesters"),
-                    (_h(choice_hours), "CHOICE hours completed this semester")])
+    body += _tiles([(_h(d["current"]), "hours this semester (completed)"), (_h(d["previous"]), "hours in earlier semesters"),
+                    (_h(choice_hours), "CHOICE hours this semester")])
 
     # ---- earlier semesters
     body += "<h2>Completed in earlier semesters</h2>"
@@ -495,7 +498,8 @@ def mentor_html(result, student_id=""):
         rows = [[f"{c} – {esc(result['courses'][c]['name'])}", _h(result["courses"][c]["fixed"]),
                  _h(result["courses"][c]["choice_logged"]), _h(result["courses"][c]["logged"])] for c in prev]
         rows.append(["<b>Total</b>", "", "", f"<b>{_h(d['previous'])}</b>"])
-        body += _table(["Course", "Embedded + aligned hours", "CHOICE hours", "Total hours"], rows, num_cols=(1, 2, 3))
+        body += _table(["Course", "Embedded + aligned hours", "CHOICE hours", "Total hours"], rows, num_cols=(1, 2, 3),
+                       widths=[46, 20, 17, 17])
     else:
         body += "<p>No earlier courses were selected as completed.</p>"
 
@@ -520,7 +524,7 @@ def mentor_html(result, student_id=""):
                         f"{len(ch)} CHOICE experience{'s' if len(ch) != 1 else ''}, listed in the table below"])
         trs.append(["", "", "", "<b>Completed</b>", f"<b>{_h(sum(a.hours for a in rows))}</b>",
                     f"of {_h(c['logged'])} hours planned for this course"])
-        body += _table(["Type", "Date", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(4,), widths=[11, 10, 13, 12, 5, 49])
+        body += _table(["Type", "Date", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(4,), widths=[11, 13, 13, 13, 5, 45])
 
     # ---- every CHOICE experience completed this semester: competency, date, location, description only
     body += f"<h2>All CHOICE experiences completed this semester ({len(choice)})</h2>"
@@ -528,7 +532,7 @@ def mentor_html(result, student_id=""):
         ordered = sorted(choice, key=lambda a: (a.date is None, a.date or date.max, a.course, a.row))
         trs = [[_comp_cell(result, a), _fmt(a.date) if a.date else "—", esc(a.location or "—"),
                 esc(a.description or "(no description)")] for a in ordered]
-        body += _table(["Competency", "Date", "Location", "Description"], trs, widths=[24, 10, 14, 52])
+        body += _table(["Competency", "Date", "Location", "Description"], trs, widths=[21, 13, 14, 52])
     else:
         body += "<p>No CHOICE experiences are marked Completed this semester.</p>"
     if omitted:
