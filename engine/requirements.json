@@ -171,5 +171,10 @@
     "line1": "UVA School of Education",
     "line2": "Administration & Supervision",
     "line3": "Internship Program"
+  },
+  "version": "2026.10.22-2",
+  "report": {
+    "_about": "show_file_name: print the name of the planning-log file the student chose in each report's Run details box (set to false if file names contain student names and you would rather rely on the file fingerprint).",
+    "show_file_name": true
   }
 }

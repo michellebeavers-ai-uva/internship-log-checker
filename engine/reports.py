@@ -43,6 +43,8 @@ td.n,th.n{text-align:right;white-space:nowrap}
 .barlabel{font-size:.85rem;color:var(--muted)}
 .foot{margin-top:2.4rem;color:var(--muted);font-size:.8rem;border-top:3px solid var(--blue);padding-top:.6rem}
 .foot b{color:var(--blue)}
+.run{font-size:.82rem;margin:.4rem 0 0}.run td{padding:.25rem .55rem}.run td:first-child{width:30%;font-weight:700;color:var(--blue)}
+.runnote{font-size:.85rem;color:var(--muted);margin:.2rem 0}
 @page{size:letter;margin:.5in}
 @media print{.band{padding:.9rem 1.2rem .8rem}main{padding:1rem 1.2rem}h2{break-after:avoid}table,.finding,.tile{break-inside:avoid}}
 """
@@ -89,6 +91,36 @@ def _foot(result=None):
             "This report was generated from your planning log by rule-based checks. It does not use AI, and your file was "
             "not uploaded anywhere. Hours count only for complete, original entries: a later entry that repeats an earlier "
             "one is not counted. The planning log is your plan; the Canvas tracking form is the official record.</p>")
+
+
+def _run_details(result):
+    """What the student entered and what was read, so a question like "this report isn't right" can be answered quickly."""
+    ri = result.get("run_info")
+    if not ri:
+        return ""
+    show_name = (result.get("cfg", {}).get("report", {}) or {}).get("show_file_name", True)
+    names = lambda codes: "; ".join(f"{c} – {esc(result['courses'][c]['name'])}" for c in codes) or "none selected"
+    t = result["term"]
+    rule = ("the Completed column" if ri["rule"] == "column"
+            else "the entry's date (on or before today); this log has no Completed column")
+    rows = [("Student ID", esc(ri["student_id"] or "(not entered)"))]
+    if show_name:
+        rows.append(("Planning log file", esc(ri["file_name"] or "(unknown)")))
+    rows += [
+        ("File fingerprint", f"{esc(ri['fingerprint'] or '—')} (identifies this exact version of the file)"),
+        ("Semester", f"{t['name']} {t['year']} ({_fmt(t['start'])} – {_fmt(t['end'])})"),
+        ("Program", esc(ri["program"])),
+        ("Currently enrolled", names(ri["current"])),
+        ("Already completed", names(ri["completed"])),
+        ("Not selected (later courses)", esc(", ".join(ri["not_selected"]) or "none")),
+        ("\"Completed\" decided by", rule),
+        ("CHOICE entries read", f"{ri['choice_read']} ({ri['not_counted']} not counted, {ri['sample_copies']} copied from a sample)"),
+        ("Checker version / run", f"{esc(ri['version'])} · {esc(ri['generated'])}"),
+    ]
+    body = "".join(f"<tr><td>{k}</td><td>{v}</td></tr>" for k, v in rows)
+    return ("<h2>Run details (for troubleshooting)</h2>"
+            "<p class='runnote'>If something in this report looks wrong, send this box (and your log file) to your supervisor.</p>"
+            f"<table class='run'><tbody>{body}</tbody></table>")
 
 
 def _tiles(items):
@@ -265,7 +297,7 @@ def feedback_html(result, student_id=""):
     body += "<h3>Earlier courses</h3>" + _courses_table(result, _codes(result, "completed"))
     body += "<h2>Competency hours (CHOICE only, whole program)</h2>" + _competency_table(result)
     body += "<h2>Hours outside your own building</h2>" + _external_table(result)
-    return _page("Planning log feedback", body + _foot(result), result)
+    return _page("Planning log feedback", body + _run_details(result) + _foot(result), result)
 
 
 def start_html(result, student_id=""):
@@ -287,7 +319,7 @@ def start_html(result, student_id=""):
     body += "<h2>To finish before the semester gets going</h2>"
     body += "".join(_finding_html(f) for f in fs) or "<p>Your plan for this semester has no open items.</p>"
     body += _suggestions(result)
-    return _page("Start-of-semester plan", body + _foot(result), result)
+    return _page("Start-of-semester plan", body + _run_details(result) + _foot(result), result)
 
 
 def _status_to_go(left):
@@ -389,4 +421,4 @@ def end_html(result, student_id=""):
                         if short_ext else ""))
     body += "<h2>Still needed to meet program requirements</h2>"
     body += ("<ul>" + "".join(f"<li>{esc(i)}</li>" for i in carry) + "</ul>") if carry else "<p>All requirements are met.</p>"
-    return _page("End-of-semester summary", body + _foot(result), result)
+    return _page("End-of-semester summary", body + _run_details(result) + _foot(result), result)
