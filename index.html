@@ -66,7 +66,7 @@ footer{margin-top:3rem;color:var(--muted);font-size:.9rem;border-top:3px solid v
 <main>
   <h1>Check your internship planning log</h1>
   <p class="lede">Choose your A&amp;S Planning Log and get feedback on hours, competencies, locations, and how your experiences are described, plus start-of-semester and end-of-semester reports.</p>
-  <p class="privacy"><b>Your file stays on your computer.</b> It is read inside this web page and is never uploaded. The checks are fixed rules, not AI, so you don’t need a Claude account.</p>
+  <p class="privacy"><b>Your file stays on your computer.</b> It is read inside this web page and is never uploaded. The checks are fixed rules, not AI, so you don’t need a Claude account. Your report ends with a short “Run details” box listing your Student ID, the courses you select, and the name of the file you chose, so any question about the report is easy to answer.</p>
 
   <p id="embedNote" class="note" hidden>Printing or downloading blocked inside Canvas? <a id="embedLink" target="_blank" rel="noopener">Open this page in its own tab</a>.</p>
 
@@ -120,11 +120,12 @@ footer{margin-top:3rem;color:var(--muted);font-size:.9rem;border-top:3px solid v
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
-const ENGINE_FILES = ["__init__.py","config.py","parse.py","textcheck.py","rules.py","reports.py","api.py","requirements.json"];
+// No "__init__.py" here on purpose: GitHub Pages never publishes file names that start with "_" or ".", so the page creates that empty file itself.
+const ENGINE_FILES = ["config.py","parse.py","textcheck.py","rules.py","reports.py","api.py","requirements.json"];
 // The spreadsheet reader (openpyxl) is not in Pyodide's own package list, so its two small pure-Python files ship with this site.
 const WHEELS = ["et_xmlfile-2.0.0-py3-none-any.whl","openpyxl-3.1.5-py2.py3-none-any.whl"];
 const $ = id => document.getElementById(id);
-let py = null, fileBuf = null, reports = null, currentKey = "feedback";
+let py = null, fileBuf = null, fileName = "", reports = null, currentKey = "feedback";
 if (window.self !== window.top){ $("embedNote").hidden = false; $("embedLink").href = location.href; }
 
 function say(msg, isError){ const s=$("status"); s.textContent=msg; s.className="status"+(isError?" error":""); }
@@ -149,6 +150,7 @@ function boot(){
       await p.unpackArchive(await r.arrayBuffer(), "wheel");
     }
     p.FS.mkdirTree("/home/pyodide/engine");
+    p.FS.writeFile("/home/pyodide/engine/__init__.py", "");
     for (const f of ENGINE_FILES){
       let r;
       try { r = await fetch("engine/"+f, {cache:"no-store"}); }
@@ -222,7 +224,7 @@ $("file").addEventListener("change", async e=>{
   const f = e.target.files[0]; if(!f) return;
   $("step2").hidden = $("step3").hidden = true; pathwayTouched = false;
   try{
-    fileBuf = await f.arrayBuffer();
+    fileBuf = await f.arrayBuffer(); fileName = f.name || "";
     await boot();
     say("Reading your log…");
     const info = await inspect();
@@ -256,7 +258,7 @@ $("run").addEventListener("click", async ()=>{
     document.querySelectorAll("input[name=cur]").forEach(i=>{
       statuses[i.value] = cur.has(i.value) ? "current" : done.has(i.value) ? "completed" : "future"; });
     py.FS.writeFile("/tmp/log.xlsx", new Uint8Array(fileBuf));
-    const opts = {term:$("term").value, year:$("year").value, statuses, pathway:$("pathway").value, student_id:sid};
+    const opts = {term:$("term").value, year:$("year").value, statuses, pathway:$("pathway").value, student_id:sid, file_name:fileName};
     const out = JSON.parse(py.globals.get("run_json")("/tmp/log.xlsx", JSON.stringify(opts)));
     if (out.error){ say(out.error, true); return; }
     reports = out.reports;
