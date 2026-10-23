@@ -27,6 +27,10 @@ tbody tr:nth-child(even) td{background:var(--gray)}
 td.n,th.n{text-align:right;white-space:nowrap}
 .chip{display:inline-block;padding:.05rem .5rem;border-radius:3px;font-size:.8rem;font-weight:700;white-space:nowrap;color:var(--ink)}
 .chip.long{white-space:normal;max-width:12rem;margin-top:.15rem}td.w,th.w{width:42%}
+table.compact{table-layout:fixed;font-size:.76rem;line-height:1.28}table.compact th,table.compact td{padding:.26rem .38rem;word-wrap:break-word;overflow-wrap:break-word}
+table.compact th{font-size:.7rem}
+table.compact .chip{font-size:.7rem;white-space:normal;max-width:none}
+.legend{font-size:.76rem;color:var(--muted);margin:.2rem 0 .1rem}
 .met{background:var(--green)}.need{background:var(--orange)}.check{background:var(--yellow)}.tip{background:var(--cyan)}
 .note{background:var(--gray);color:var(--blue);border:1px solid var(--gray2)}.gone{background:var(--blue25);color:var(--blue)}
 .finding{border-left:6px solid var(--gray2);padding:.4rem .9rem;margin:.65rem 0;background:#fff;box-shadow:0 0 0 1px var(--gray2) inset}
@@ -45,7 +49,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
 .foot b{color:var(--blue)}
 .run{font-size:.82rem;margin:.4rem 0 0}.run td{padding:.25rem .55rem}.run td:first-child{width:30%;font-weight:700;color:var(--blue)}
 .runnote{font-size:.85rem;color:var(--muted);margin:.2rem 0}
-@page{size:letter;margin:.5in}
+@page{margin:.5in}
 @media print{.band{padding:.9rem 1.2rem .8rem}main{padding:1rem 1.2rem}h2{break-after:avoid}table,.finding,.tile{break-inside:avoid}}
 """
 
@@ -143,13 +147,15 @@ def _chip(kind, text, long=False):
     return f"<span class='chip {kind}{' long' if long else ''}'>{esc(text)}</span>"
 
 
-def _table(headers, rows, num_cols=(), wide_cols=()):
-    cls = lambda i: ("n" if i in num_cols else "") + (" w" if i in wide_cols else "")
+def _table(headers, rows, num_cols=(), wide_cols=(), widths=None):
+    """widths: column widths in percent. Giving widths makes a compact, fixed-layout table (long text wraps inside its column)."""
+    cls = lambda i: ("n" if i in num_cols else "") + (" w" if i in wide_cols and not widths else "")
     th = "".join(f"<th class='{cls(i)}'>{esc(h)}</th>" for i, h in enumerate(headers))
     body = ""
     for r in rows:
         body += "<tr>" + "".join(f"<td class='{cls(i)}'>{c}</td>" for i, c in enumerate(r)) + "</tr>"
-    return f"<table><thead><tr>{th}</tr></thead><tbody>{body}</tbody></table>"
+    group = "<colgroup>" + "".join(f"<col style='width:{w}%'>" for w in widths) + "</colgroup>" if widths else ""
+    return f"<table{' class=\"compact\"' if widths else ''}>{group}<thead><tr>{th}</tr></thead><tbody>{body}</tbody></table>"
 
 
 def _finding_html(f):
@@ -288,7 +294,7 @@ def _activity_table(result, code, with_status):
             row.append(flag or "—")
         rows.append(row)
     heads = ["Type", "Date", "Location", "Role", "Hrs", "Description", "Status" if with_status else "Flag"]
-    return _table(heads, rows, num_cols=(4,), wide_cols=(5,))
+    return _table(heads, rows, num_cols=(4,), widths=[10, 10, 12, 12, 5, 35, 16])
 
 
 def feedback_html(result, student_id=""):
@@ -437,13 +443,12 @@ def _is_done(result, a):
     return bool(a.date and a.date <= result["today"])
 
 
-def _comp_label(result, a):
-    if not a.comps:
-        return "—"
-    if len(a.comps) > 1:
-        return "More than one marked"
-    n = a.comps[0]
-    return f"{n}. {esc(result['cfg']['competencies'][str(n)]['name'])}"
+GLYPHS = "①②③④⑤⑥"
+
+
+def _comp_glyph(a):
+    """The circled competency number(s), like the log's All CHOICE tab."""
+    return "".join(GLYPHS[n - 1] for n in a.comps) if a.comps else "—"
 
 
 def _short(text, n):
@@ -497,19 +502,22 @@ def mentor_html(result, student_id=""):
             body += "<p>No experiences are marked Completed yet.</p>"
             continue
         trs = [[a.kind.title(), _fmt(a.date) if a.date else "—", esc(a.location or "—"), esc(a.role or "—"), _h(a.hours),
-                esc(_short(a.description, 110 if a.kind != "CHOICE" else 10_000))] for a in rows]
+                esc(_short(a.description, 70 if a.kind != "CHOICE" else 10_000))] for a in rows]
         trs.append(["", "", "", "<b>Completed</b>", f"<b>{_h(sum(a.hours for a in rows))}</b>",
                     f"of {_h(c['logged'])} hours planned for this course"])
-        body += _table(["Type", "Date", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(4,), wide_cols=(5,))
+        body += _table(["Type", "Date", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(4,), widths=[11, 10, 13, 12, 5, 49])
 
-    # ---- every CHOICE experience completed this semester
+    # ---- every CHOICE experience completed this semester, laid out like the log's All CHOICE tab
     body += "<h2>All CHOICE experiences completed this semester</h2>"
     if choice:
+        key = " &nbsp;·&nbsp; ".join(f"{GLYPHS[int(n) - 1]} {esc(v['name'])}" for n, v in result["cfg"]["competencies"].items())
+        body += f"<p class='legend'>Competency: {key}</p>"
         ordered = sorted(choice, key=lambda a: (a.date is None, a.date or date.max, a.course, a.row))
-        trs = [[_fmt(a.date) if a.date else "—", f"{a.course}", _comp_label(result, a), esc(a.location or "—"), esc(a.role or "—"),
-                _h(a.hours), esc(a.description or "(no description)")] for a in ordered]
-        trs.append(["", "", "", "", "<b>Total</b>", f"<b>{_h(choice_hours)}</b>", ""])
-        body += _table(["Date", "Course", "Competency", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(5,), wide_cols=(6,))
+        trs = [[_comp_glyph(a), _fmt(a.date) if a.date else "—", esc(a.site or "—"), esc(a.location or "—"),
+                esc(a.description or "(no description)"), esc(a.role or "—"), _h(a.hours), a.course] for a in ordered]
+        trs.append(["", "", "", "", "", "<b>Total</b>", f"<b>{_h(choice_hours)}</b>", ""])
+        body += _table(["Competency", "Date", "Name the Location", "Type", "Experience", "Role", "Hours", "Course"], trs,
+                       num_cols=(6,), widths=[11, 9, 13, 11, 31, 11, 6, 8])
     else:
         body += "<p>No CHOICE experiences are marked Completed this semester.</p>"
     if omitted:
