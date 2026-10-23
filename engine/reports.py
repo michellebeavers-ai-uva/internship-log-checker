@@ -451,6 +451,15 @@ def _comp_glyph(a):
     return "".join(GLYPHS[n - 1] for n in a.comps) if a.comps else "—"
 
 
+def _comp_cell(result, a):
+    """Circled number plus the competency's name, e.g. '③ Operational Management'."""
+    if not a.comps:
+        return "—"
+    if len(a.comps) > 1:
+        return f"{_comp_glyph(a)} (more than one marked)"
+    return f"{GLYPHS[a.comps[0] - 1]} {esc(result['cfg']['competencies'][str(a.comps[0])]['name'])}"
+
+
 def _short(text, n):
     text = text or "(no description)"
     return text if len(text) <= n else text[:n - 3] + "..."
@@ -501,23 +510,25 @@ def mentor_html(result, student_id=""):
         if not rows:
             body += "<p>No experiences are marked Completed yet.</p>"
             continue
+        repeat = (result["cfg"].get("report", {}) or {}).get("mentor_choice_in_courses", False)
+        shown = [a for a in rows if repeat or a.kind != "CHOICE"]
         trs = [[a.kind.title(), _fmt(a.date) if a.date else "—", esc(a.location or "—"), esc(a.role or "—"), _h(a.hours),
-                esc(_short(a.description, 70 if a.kind != "CHOICE" else 10_000))] for a in rows]
+                esc(_short(a.description, 70 if a.kind != "CHOICE" else 10_000))] for a in shown]
+        ch = [a for a in rows if a.kind == "CHOICE"]
+        if ch and not repeat:                       # listed once, in the table below, instead of twice
+            trs.append(["Choice", "", "", "", _h(sum(a.hours for a in ch)),
+                        f"{len(ch)} CHOICE experience{'s' if len(ch) != 1 else ''}, listed in the table below"])
         trs.append(["", "", "", "<b>Completed</b>", f"<b>{_h(sum(a.hours for a in rows))}</b>",
                     f"of {_h(c['logged'])} hours planned for this course"])
         body += _table(["Type", "Date", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(4,), widths=[11, 10, 13, 12, 5, 49])
 
-    # ---- every CHOICE experience completed this semester, laid out like the log's All CHOICE tab
-    body += "<h2>All CHOICE experiences completed this semester</h2>"
+    # ---- every CHOICE experience completed this semester: competency, date, location, description only
+    body += f"<h2>All CHOICE experiences completed this semester ({len(choice)})</h2>"
     if choice:
-        key = " &nbsp;·&nbsp; ".join(f"{GLYPHS[int(n) - 1]} {esc(v['name'])}" for n, v in result["cfg"]["competencies"].items())
-        body += f"<p class='legend'>Competency: {key}</p>"
         ordered = sorted(choice, key=lambda a: (a.date is None, a.date or date.max, a.course, a.row))
-        trs = [[_comp_glyph(a), _fmt(a.date) if a.date else "—", esc(a.site or "—"), esc(a.location or "—"),
-                esc(a.description or "(no description)"), esc(a.role or "—"), _h(a.hours), a.course] for a in ordered]
-        trs.append(["", "", "", "", "", "<b>Total</b>", f"<b>{_h(choice_hours)}</b>", ""])
-        body += _table(["Competency", "Date", "Name the Location", "Type", "Experience", "Role", "Hours", "Course"], trs,
-                       num_cols=(6,), widths=[11, 9, 13, 11, 31, 11, 6, 8])
+        trs = [[_comp_cell(result, a), _fmt(a.date) if a.date else "—", esc(a.location or "—"),
+                esc(a.description or "(no description)")] for a in ordered]
+        body += _table(["Competency", "Date", "Location", "Description"], trs, widths=[24, 10, 14, 52])
     else:
         body += "<p>No CHOICE experiences are marked Completed this semester.</p>"
     if omitted:
