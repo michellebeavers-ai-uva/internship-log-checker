@@ -6,7 +6,7 @@ from datetime import date, datetime
 
 from .config import load_config, term_for_date, term_window
 from .parse import read_workbook
-from .reports import end_html, feedback_html, start_html
+from .reports import end_html, feedback_html, mentor_html, start_html
 from .rules import analyze, infer_statuses
 
 
@@ -84,7 +84,8 @@ def run(source, term=None, year=None, statuses=None, pathway="auto", student_id=
     }
     docs = {"feedback": feedback_html(result, student_id),
             "start": start_html(result, student_id),
-            "end": end_html(result, student_id)}
+            "end": end_html(result, student_id),
+            "mentor": mentor_html(result, student_id)}
     return result, docs
 
 

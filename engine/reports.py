@@ -85,8 +85,13 @@ def _head(result, title, student_id):
             f"({_fmt(t['start'])} – {_fmt(t['end'])}) · prepared {_fmt(result['today'])}</p>")
 
 
-def _foot(result=None):
+def _foot(result=None, mentor=False):
     b = _brand(result or {})
+    if mentor:
+        return (f"<p class='foot'><b>{esc(b['line1'])}: {esc(b['line2'])}</b> · {esc(b['line3'])}<br>"
+                "This summary was generated from the student's planning log by rule-based checks (no AI). It lists only experiences "
+                "the student marked Completed, and it leaves out entries that repeat an earlier entry. The Canvas tracking form is "
+                "the official record.</p>")
     return (f"<p class='foot'><b>{esc(b['line1'])}: {esc(b['line2'])}</b> · {esc(b['line3'])}<br>"
             "This report was generated from your planning log by rule-based checks. It does not use AI, and your file was "
             "not uploaded anywhere. Hours count only for complete, original entries: a later entry that repeats an earlier "
@@ -422,3 +427,92 @@ def end_html(result, student_id=""):
     body += "<h2>Still needed to meet program requirements</h2>"
     body += ("<ul>" + "".join(f"<li>{esc(i)}</li>" for i in carry) + "</ul>") if carry else "<p>All requirements are met.</p>"
     return _page("End-of-semester summary", body + _run_details(result) + _foot(result), result)
+
+
+# ------------------------------------------------------------------ Mentor report
+def _is_done(result, a):
+    """Same rule the end-of-semester report uses: the Completed column, or (older logs) a date on or before today."""
+    if result["done"]["mode"] == "column":
+        return a.completed
+    return bool(a.date and a.date <= result["today"])
+
+
+def _comp_label(result, a):
+    if not a.comps:
+        return "—"
+    if len(a.comps) > 1:
+        return "More than one marked"
+    n = a.comps[0]
+    return f"{n}. {esc(result['cfg']['competencies'][str(n)]['name'])}"
+
+
+def _short(text, n):
+    text = text or "(no description)"
+    return text if len(text) <= n else text[:n - 3] + "..."
+
+
+def mentor_html(result, student_id=""):
+    """For mentors: what was completed in earlier semesters, what was completed this semester (per course), and every
+    CHOICE experience completed this semester. Only counted entries are listed; repeats of an earlier entry are left out."""
+    cur, prev = _codes(result, "current"), _codes(result, "completed")
+    model, excluded = result["model"], result["excluded"]
+    done_rows, choice, omitted = {}, [], 0
+    for code in cur:
+        rows = []
+        for a in model.tabs[code].activities:
+            if not _is_done(result, a) or a.hours <= 0:
+                continue
+            if (a.course, a.row) in excluded:
+                omitted += 1
+                continue
+            rows.append(a)
+        done_rows[code] = rows
+        choice += [a for a in rows if a.kind == "CHOICE"]
+    d = result["done"]["hours"]
+    choice_hours = sum(a.hours for a in choice)
+
+    body = _head(result, "Mentor summary", student_id)
+    body += _tiles([(_h(d["current"]), "hours completed this semester"), (_h(d["previous"]), "hours completed in earlier semesters"),
+                    (_h(choice_hours), "CHOICE hours completed this semester")])
+
+    # ---- earlier semesters
+    body += "<h2>Completed in earlier semesters</h2>"
+    if prev:
+        rows = [[f"{c} – {esc(result['courses'][c]['name'])}", _h(result["courses"][c]["fixed"]),
+                 _h(result["courses"][c]["choice_logged"]), _h(result["courses"][c]["logged"])] for c in prev]
+        rows.append(["<b>Total</b>", "", "", f"<b>{_h(d['previous'])}</b>"])
+        body += _table(["Course", "Embedded + aligned hours", "CHOICE hours", "Total hours"], rows, num_cols=(1, 2, 3))
+    else:
+        body += "<p>No earlier courses were selected as completed.</p>"
+
+    # ---- this semester, per course
+    body += "<h2>Completed this semester, by course</h2>"
+    if not cur:
+        body += "<p>No courses were selected for this semester.</p>"
+    for code in cur:
+        c = result["courses"][code]
+        body += f"<h3>{code} – {esc(c['name'])}</h3>"
+        rows = done_rows[code]
+        if not rows:
+            body += "<p>No experiences are marked Completed yet.</p>"
+            continue
+        trs = [[a.kind.title(), _fmt(a.date) if a.date else "—", esc(a.location or "—"), esc(a.role or "—"), _h(a.hours),
+                esc(_short(a.description, 110 if a.kind != "CHOICE" else 10_000))] for a in rows]
+        trs.append(["", "", "", "<b>Completed</b>", f"<b>{_h(sum(a.hours for a in rows))}</b>",
+                    f"of {_h(c['logged'])} hours planned for this course"])
+        body += _table(["Type", "Date", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(4,), wide_cols=(5,))
+
+    # ---- every CHOICE experience completed this semester
+    body += "<h2>All CHOICE experiences completed this semester</h2>"
+    if choice:
+        ordered = sorted(choice, key=lambda a: (a.date is None, a.date or date.max, a.course, a.row))
+        trs = [[_fmt(a.date) if a.date else "—", f"{a.course}", _comp_label(result, a), esc(a.location or "—"), esc(a.role or "—"),
+                _h(a.hours), esc(a.description or "(no description)")] for a in ordered]
+        trs.append(["", "", "", "", "<b>Total</b>", f"<b>{_h(choice_hours)}</b>", ""])
+        body += _table(["Date", "Course", "Competency", "Location", "Role", "Hrs", "Experience"], trs, num_cols=(5,), wide_cols=(6,))
+    else:
+        body += "<p>No CHOICE experiences are marked Completed this semester.</p>"
+    if omitted:
+        body += (f"<p class='runnote'>{omitted} completed entr{'y' if omitted == 1 else 'ies'} that repeat an earlier entry "
+                 "are not counted and are not listed.</p>")
+    return _page("Mentor summary", body + _foot(result, mentor=True), result)
