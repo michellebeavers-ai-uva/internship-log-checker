@@ -25,6 +25,7 @@ class Activity:
     hours_unreadable: bool = False
     comps: list = field(default_factory=list)
     evidence: str = ""
+    site: str = ""               # the "Site name" column (shown as "Name the Location" on All CHOICE)
     completed: bool = False      # only meaningful when the workbook has a "Completed" column
     sheet: str = ""              # tab the row lives on (the 2nd-MEd tab holds two courses' blocks)
 
@@ -124,6 +125,7 @@ def _read_rows(ws, default_code, tabs):
     c_hrs = cols.get("hrs", 6)
     c_comp = [cols.get(lbl, 7 + i) for i, lbl in enumerate(COMP_LABELS)]
     c_evid = cols.get("evidence / notes", 13)
+    c_site = cols.get("site name", 14)
     c_done = cols.get("completed")
     sheet = ws.title.strip()
     current = default_code
@@ -158,6 +160,7 @@ def _read_rows(ws, default_code, tabs):
         act.comps = [i + 1 for i, c in enumerate(c_comp)
                      if _clean(ws.cell(r, c).value).upper() == "X"]
         act.evidence = _clean(ws.cell(r, c_evid).value)
+        act.site = _clean(ws.cell(r, c_site).value)
         if c_done:
             act.completed = _clean(ws.cell(r, c_done).value).lower() in DONE_VALUES
         blank = not (act.description or act.hours or act.date or act.location
