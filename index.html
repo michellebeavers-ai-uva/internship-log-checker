@@ -106,13 +106,18 @@ footer{margin-top:3rem;color:var(--muted);font-size:.9rem;border-top:3px solid v
       <button class="tab" role="tab" id="t-feedback" aria-selected="true" data-k="feedback">Feedback</button>
       <button class="tab" role="tab" id="t-start" aria-selected="false" data-k="start">Start of semester</button>
       <button class="tab" role="tab" id="t-end" aria-selected="false" data-k="end">End of semester</button>
+      <button class="tab" role="tab" id="t-mentor" aria-selected="false" data-k="mentor">Mentor report</button>
     </div>
     <div class="actions">
       <button class="ghost" id="print">Print or save as PDF</button>
-      <button class="ghost" id="download">Download this report</button>
+      <button class="ghost" id="openTab">Open in a new tab</button>
+      <button class="ghost" id="download">Download HTML copy</button>
       <button class="ghost" id="again">Start over with another file</button>
     </div>
-    <iframe id="view" title="Report preview" sandbox="allow-same-origin"></iframe>
+    <p class="note" id="pdfHint">To save a PDF: click <b>Print or save as PDF</b>, then in the print window choose <b>Save as PDF</b> as the destination
+      (on a Mac, use the <b>PDF</b> menu at the bottom left). If printing does nothing (some Canvas pages block it), click
+      <b>Open in a new tab</b>, then press Command-P (Windows: Ctrl-P).</p>
+    <iframe id="view" title="Report preview" sandbox="allow-same-origin allow-modals"></iframe>
   </section>
 
   <footer>Checks are based on the A&amp;S Planning Log. The log is your plan; the Canvas tracking form is the official record. Questions about a result? Contact your internship supervisor.</footer>
@@ -277,7 +282,18 @@ function show(k){
   $("view").srcdoc = reports[k];
 }
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>show(t.dataset.k)));
-$("print").addEventListener("click",()=>{ const w=$("view").contentWindow; w.focus(); w.print(); });
+function openInTab(){
+  const blob = new Blob([reports[currentKey]], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, "_blank");
+  if (!w) say("Your browser blocked the new tab. Allow pop-ups for this site, or use Download HTML copy.", true);
+  setTimeout(()=>URL.revokeObjectURL(url), 120000);
+}
+$("print").addEventListener("click",()=>{
+  try { const w=$("view").contentWindow; w.focus(); w.print(); }
+  catch(e){ openInTab(); }        // printing from inside the frame was refused: fall back to a normal tab
+});
+$("openTab").addEventListener("click", openInTab);
 $("download").addEventListener("click",()=>{
   const blob = new Blob([reports[currentKey]], {type:"text/html"});
   const a = document.createElement("a");
